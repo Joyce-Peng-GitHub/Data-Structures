@@ -6,8 +6,8 @@
 
 namespace ds {
 	template <typename elem_t,
-			  typename oper_t,
-			  elem_t init>
+			  elem_t init,
+			  typename oper_t>
 	class generic_segtree {
 	public:
 		inline generic_segtree() = default;

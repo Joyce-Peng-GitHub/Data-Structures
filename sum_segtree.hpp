@@ -7,8 +7,8 @@
 
 namespace ds {
 	template <typename elem_t,
-			  typename plus_t = std::plus<elem_t>,
-			  elem_t init = elem_t()>
+			  elem_t init = elem_t(),
+			  typename plus_t = std::plus<elem_t>>
 	class sum_segtree : public generic_segtree<elem_t, plus_t, init> {
 	public:
 		using base_t = generic_segtree<elem_t, plus_t, init>;
