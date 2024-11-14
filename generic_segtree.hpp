@@ -27,7 +27,7 @@ namespace ds {
 			for (size_t i = 0; i != old && i != this->treesize(); ++i) {
 				this->__tree[i] = init;
 			}
-		}
+		} // clear and resize
 		inline void build(size_t _n, const elem_t &_val) {
 			size_t old = this->treesize();
 			this->__tree.resize(((_n << 2) + 1), _val);
