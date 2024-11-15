@@ -1,6 +1,7 @@
 #ifndef _FENWICK_TREE_HPP
 #define _FENWICK_TREE_HPP
 
+#include <cstddef>
 #include <vector>
 
 namespace ds {
@@ -12,32 +13,22 @@ namespace ds {
 	public:
 		inline static size_t lowbit(size_t x) { return (x & (-x)); }
 
-		inline fenwicktree() = default;
-		inline fenwicktree(size_t _n) : __tree(_n + 1, init) {}
+		inline fenwicktree(size_t _n = 0) : __tree(_n + 1, init) {}
 		template <typename iter_t>
 		inline fenwicktree(iter_t _begin, iter_t _end)
-			: __tree(std::distance(_begin, _end) + 1, init) {
-			for (size_t i = 1, j; i != this->__tree.size(); ++i) {
-				this->__tree[i] = this->__oper(this->__tree[i], *(_begin++));
-				j = i + lowbit(i);
-				if (j < this->__tree.size()) {
-					this->__tree[j] = this->__oper(this->__tree[j], this->__tree[i]);
-				}
-			}
+			: __tree(std::distance(_begin, _end) + 1) {
+			this->__tree.front() = init;
+			std::copy(_begin, _end, this->__tree.begin() + 1);
+			this->__build();
 		}
 
 		inline size_t treesize() const { return this->__tree.size(); }
 		inline size_t size() const { return (this->__tree.size() - 1); }
 		template <typename iter_t>
 		inline void build(iter_t _begin, iter_t _end) {
-			this->__tree = std::move(std::vector<elem_t>(std::distance(_begin, _end) + 1, init));
-			for (size_t i = 1, j; i != this->__tree.size(); ++i) {
-				this->__tree[i] = this->__oper(this->__tree[i], *(_begin++));
-				j = i + lowbit(i);
-				if (j < this->__tree.size()) {
-					this->__tree[j] = this->__oper(this->__tree[j], this->__tree[i]);
-				}
-			}
+			this->__tree.resize(std::distance(_begin, _end) + 1);
+			std::copy(_begin, _end, this->__tree.begin() + 1);
+			this->__build();
 		}
 		inline void add(size_t _index, const elem_t &_diff) {
 			this->__range_check(_index);
@@ -73,6 +64,14 @@ namespace ds {
 												  "(which is %zu) >= this->size() "
 												  "(which is %zu)"),
 											  _index, this->size());
+			}
+		}
+		inline void __build() {
+			for (size_t i = 1, j; i != this->__tree.size(); ++i) {
+				j = i + lowbit(i);
+				if (j < this->__tree.size()) {
+					this->__tree[j] = this->__oper(this->__tree[j], this->__tree[i]);
+				}
 			}
 		}
 
