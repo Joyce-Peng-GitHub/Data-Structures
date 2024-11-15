@@ -3,17 +3,13 @@
 
 #include "generic_segtree.hpp"
 
-#include <algorithm>
+#include <functional>
 
 namespace ds {
 	template <typename elem_t,
 			  elem_t init,
-			  typename oper_t = std::less<elem_t>>
-	class extreme_segtree {
-	public:
-	protected:
-	private:
-	};
+			  typename comp_t = std::less<elem_t>>
+	using extreme_segtree = generic_segtree<elem_t, init, comp_t>;
 }
 
 #endif
