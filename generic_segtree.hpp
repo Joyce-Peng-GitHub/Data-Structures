@@ -13,7 +13,7 @@ namespace ds {
 		inline generic_segtree() = default;
 		inline generic_segtree(size_t _n) : __tree(((_n << 2) + 1), init) {}
 		template <typename iter_t>
-		generic_segtree(iter_t _begin, iter_t _end) : __tree(std::distance(_begin, _end)) {
+		generic_segtree(iter_t _begin, iter_t _end) : __tree((std::distance(_begin, _end) << 2) + 1) {
 			this->__build(0, _begin, _end);
 		}
 
