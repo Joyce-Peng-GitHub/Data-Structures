@@ -7,7 +7,7 @@
 
 namespace ds {
 	template <typename elem_t,
-			  elem_t min,
+			  elem_t init,
 			  typename oper_t = std::less<elem_t>>
 	class extreme_segtree {
 	public:
