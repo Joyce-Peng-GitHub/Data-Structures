@@ -1,7 +1,7 @@
 #ifndef _SUM_SEGTREE_HPP
 #define _SUM_SEGTREE_HPP
 
-#include "generic_segtree.hpp"
+#include "__segtree_base.hpp"
 
 #include <functional>
 
@@ -10,9 +10,9 @@ namespace ds {
 			  elem_t init = elem_t(),
 			  typename plus_t = std::plus<elem_t>,
 			  typename minus_t = std::minus<elem_t>>
-	class sum_segtree : public generic_segtree<elem_t, init, plus_t> {
+	class sum_segtree : public __segtree_base<elem_t, init, plus_t> {
 	public:
-		using base_t = generic_segtree<elem_t, init, plus_t>;
+		using base_t = __segtree_base<elem_t, init, plus_t>;
 
 		sum_segtree() = default;
 		sum_segtree(size_t _n) : base_t(_n) {}

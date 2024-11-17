@@ -1,5 +1,5 @@
-#ifndef _GENERIC_SEGTREE_HPP
-#define _GENERIC_SEGTREE_HPP
+#ifndef ___SEGTREE_BASE_HPP
+#define ___SEGTREE_BASE_HPP
 
 #include <cstddef>
 #include <vector>
@@ -8,12 +8,12 @@ namespace ds {
 	template <typename elem_t,
 			  elem_t init,
 			  typename oper_t>
-	class generic_segtree {
+	class __segtree_base {
 	public:
-		inline generic_segtree() = default;
-		inline generic_segtree(size_t _n) : __tree(((_n << 2) + 1), init) {}
+		inline __segtree_base() = default;
+		inline __segtree_base(size_t _n) : __tree(((_n << 2) + 1), init) {}
 		template <typename iter_t>
-		generic_segtree(iter_t _begin, iter_t _end) : __tree((std::distance(_begin, _end) << 2) + 1) {
+		__segtree_base(iter_t _begin, iter_t _end) : __tree((std::distance(_begin, _end) << 2) + 1) {
 			this->__build(0, _begin, _end);
 		}
 
@@ -27,7 +27,7 @@ namespace ds {
 			for (size_t i = 0; i != old && i != this->treesize(); ++i) {
 				this->__tree[i] = init;
 			}
-		} // clear and resize
+		}
 		inline void build(size_t _n, const elem_t &_val) {
 			size_t old = this->treesize();
 			this->__tree.resize(((_n << 2) + 1), _val);
@@ -58,7 +58,7 @@ namespace ds {
 
 		inline void __range_check(size_t _pos) const {
 			if (_pos >= this->__tree.size()) {
-				std::__throw_out_of_range_fmt(__N("generic_segtree::__range_check: _pos "
+				std::__throw_out_of_range_fmt(__N("__segtree_base::__range_check: _pos "
 												  "(which is %zu) >= this->size() "
 												  "(which is %zu)"),
 											  _pos, this->size());
