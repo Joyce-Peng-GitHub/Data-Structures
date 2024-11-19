@@ -3,6 +3,7 @@
 
 #include "__segtree_base.hpp"
 #include "extreme_segtree.hpp"
+#include "lazy_sum_segtree.hpp"
 #include "sum_segtree.hpp"
 
 namespace ds {
