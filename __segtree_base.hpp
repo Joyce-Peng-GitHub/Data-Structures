@@ -38,8 +38,9 @@ namespace ds {
 		}
 		template <typename iter_t>
 		inline void build(iter_t _begin, iter_t _end) {
-			this->build(std::distance(_begin, _end));
-			this->__build(0, _begin, _end);
+			size_t n = std::distance(_begin, _end);
+			this->build(n);
+			this->__build(0, _begin, n);
 		}
 
 		inline void modify(size_t _pos, const elem_t &_val) {
@@ -78,15 +79,15 @@ namespace ds {
 			}
 		}
 		template <typename iter_t>
-		void __build(size_t _index, iter_t _begin, iter_t _end) {
-			size_t n = std::distance(_begin, _end);
-			if (n == 1) {
+		void __build(size_t _index, iter_t _begin, size_t _n) {
+			if (_n == 1) {
 				this->__tree[_index] = *_begin;
 			} else {
-				iter_t mid = std::next(_begin, (n >> 1));
 				size_t lch = __lchild(_index), rch = __rchild(_index);
-				this->__build(lch, _begin, mid);
-				this->__build(rch, mid, _end);
+				this->__build(lch, _begin, (_n >> 1));
+				this->__build(rch,
+							  std::next(_begin, _n >> 1),
+							  (_n >> 1) + (_n & 1));
 				this->__tree[_index] = this->__oper(this->__tree[lch],
 													this->__tree[rch]);
 			}

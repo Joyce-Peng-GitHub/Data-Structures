@@ -50,7 +50,7 @@ namespace ds {
 			for (size_t i = 0; i != m && i != this->lazysize(); ++i) {
 				this->__lazy[i] = init;
 			}
-			this->__build(0, _begin, _end);
+			this->__build(0, _begin, n);
 		}
 
 		/**
