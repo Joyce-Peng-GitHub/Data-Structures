@@ -11,10 +11,14 @@ namespace ds {
 	class __segtree_base {
 	public:
 		inline __segtree_base() = default;
-		inline __segtree_base(size_t _n) : __tree(((_n << 2) + 1), init) {}
+		inline __segtree_base(size_t _n) : __tree((_n ? ((_n << 2) - 1) : 0), init) {}
 		template <typename iter_t>
-		__segtree_base(iter_t _begin, iter_t _end) : __tree((std::distance(_begin, _end) << 2) + 1) {
-			this->__build(0, _begin, _end);
+		__segtree_base(iter_t _begin, iter_t _end) {
+			size_t n = std::distance(_begin, _end);
+			if (n) {
+				this->__tree.resize((n << 2) - 1);
+				this->__build(0, _begin, n);
+			}
 		}
 
 		inline size_t treesize() const { return this->__tree.size(); }
@@ -22,25 +26,37 @@ namespace ds {
 
 		inline void clear() { this->__tree.clear(); }
 		inline void build(size_t _n) {
-			size_t old = this->treesize();
-			this->__tree.resize(((_n << 2) + 1), init);
-			for (size_t i = 0; i != old && i != this->treesize(); ++i) {
-				this->__tree[i] = init;
+			if (_n) {
+				size_t old = this->treesize();
+				this->__tree.resize(((_n << 2) - 1), init);
+				for (size_t i = 0; i != old && i != this->treesize(); ++i) {
+					this->__tree[i] = init;
+				}
+			} else {
+				this->clear();
 			}
 		}
 		inline void build(size_t _n, const elem_t &_val) {
-			size_t old = this->treesize();
-			this->__tree.resize(((_n << 2) + 1), _val);
-			for (size_t i = 0; i != old && i != this->treesize(); ++i) {
-				this->__tree[i] = _val;
+			if (_n) {
+				size_t old = this->treesize();
+				this->__tree.resize(((_n << 2) - 1), _val);
+				for (size_t i = 0; i != old && i != this->treesize(); ++i) {
+					this->__tree[i] = _val;
+				}
+				this->__up(0, 0, _n);
+			} else {
+				this->clear();
 			}
-			this->__up(0, 0, _n);
 		}
 		template <typename iter_t>
 		inline void build(iter_t _begin, iter_t _end) {
 			size_t n = std::distance(_begin, _end);
-			this->build(n);
-			this->__build(0, _begin, n);
+			if (n) {
+				this->build(n);
+				this->__build(0, _begin, n);
+			} else {
+				this->clear();
+			}
 		}
 
 		inline void modify(size_t _pos, const elem_t &_val) {

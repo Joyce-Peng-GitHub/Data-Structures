@@ -16,11 +16,11 @@ namespace ds {
 
 		lazy_sum_segtree() = default;
 		lazy_sum_segtree(size_t _n)
-			: base_t(_n), __lazy((_n ?: (_n << 1) - 1)) {}
+			: base_t(_n), __lazy(_n ? ((_n << 1) - 1) : 0) {}
 		template <typename iter_t>
 		lazy_sum_segtree(iter_t _begin, iter_t _end)
 			: base_t(_begin, _end),
-			  __lazy((this->size() ?: ((this->size() << 1) - 1)), init) {}
+			  __lazy((this->size() ? ((this->size() << 1) - 1) : 0), init) {}
 
 		inline size_t lazysize() const { return this->__lazy.size(); }
 
@@ -46,11 +46,16 @@ namespace ds {
 		template <typename iter_t>
 		inline void build(iter_t _begin, iter_t _end) {
 			size_t m = this->lazysize(), n = std::distance(_begin, _end);
-			this->__lazy.resize((n << 1) - 1, init);
-			for (size_t i = 0; i != m && i != this->lazysize(); ++i) {
-				this->__lazy[i] = init;
+			if (n) {
+				this->__lazy.resize(((n << 1) - 1), init);
+				for (size_t i = 0; i != m && i != this->lazysize(); ++i) {
+					this->__lazy[i] = init;
+				}
+				this->build(n);
+				this->base_t::__build(0, _begin, n);
+			} else {
+				this->clear();
 			}
-			this->__build(0, _begin, n);
 		}
 
 		/**
@@ -103,10 +108,14 @@ namespace ds {
 								 this->__mul(((_end - _begin + 1) >> 1),
 											 this->__lazy[_index]));
 				/* Tag the 2 sub-nodes */
-				this->__lazy[lch] = this->__oper(this->__lazy[lch],
-												 this->__lazy[_index]);
-				this->__lazy[rch] = this->__oper(this->__lazy[rch],
-												 this->__lazy[_index]);
+				if (lch < this->lazysize()) {
+					this->__lazy[lch] = this->__oper(this->__lazy[lch],
+													 this->__lazy[_index]);
+				}
+				if (rch < this->lazysize()) {
+					this->__lazy[rch] = this->__oper(this->__lazy[rch],
+													 this->__lazy[_index]);
+				}
 				/* Untag the current node */
 				this->__lazy[_index] = init;
 			}
@@ -129,7 +138,7 @@ namespace ds {
 				elem_t &&diff = this->__inv(_val, this->__tree[_index]);
 				this->__tree[_index] = _val;
 				return diff;
-			}
+			} // _index is a leaf node
 			/**
 			 * If _index is a leaf node,
 			 * it must be covered entirely by the target range.
@@ -151,7 +160,7 @@ namespace ds {
 				/* The entire segment is covered by the target range. */
 				this->__tree[_index] =
 					this->__oper(this->__tree[_index],
-								 this->__mul(_end - _begin, _diff));
+								 this->__mul(_node_end - _node_begin, _diff));
 				if (_node_begin + 1 != _node_end) {
 					this->__lazy[_index] = this->__oper(this->__lazy[_index],
 														_diff);
@@ -164,7 +173,7 @@ namespace ds {
 				this->__spread(_index, _node_begin, _node_end);
 				size_t node_mid = _node_begin +
 								  ((_node_end - _node_begin) >> 1);
-				if (_begin <= node_mid) {
+				if (_begin < node_mid) {
 					this->__add(__lchild(_index), _node_begin, node_mid,
 								_begin, _end, _diff);
 				}
@@ -183,7 +192,7 @@ namespace ds {
 				/* The entire segment is covered by the target range. */
 				this->__tree[_index] =
 					this->__inv(this->__tree[_index],
-								this->__mul(_end - _begin, _diff));
+								this->__mul(_node_end - _node_begin, _diff));
 				if (_node_begin + 1 != _node_end) {
 					this->__lazy[_index] = this->__inv(this->__lazy[_index],
 													   _diff);
@@ -196,7 +205,7 @@ namespace ds {
 				this->__spread(_index, _node_begin, _node_end);
 				size_t node_mid = _node_begin +
 								  ((_node_end - _node_begin) >> 1);
-				if (_begin <= node_mid) {
+				if (_begin < node_mid) {
 					this->__subtract(__lchild(_index), _node_begin, node_mid,
 									 _begin, _end, _diff);
 				}
@@ -222,7 +231,7 @@ namespace ds {
 			this->__spread(_index, _node_begin, _node_end);
 			size_t node_mid = _node_begin +
 							  ((_node_end - _node_begin) >> 1);
-			return this->__oper((_begin <= node_mid)
+			return this->__oper((_begin < node_mid)
 									? this->__query(__lchild(_index),
 													_node_begin, node_mid,
 													_begin, _end)
