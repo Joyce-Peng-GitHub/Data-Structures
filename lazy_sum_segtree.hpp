@@ -5,10 +5,10 @@
 
 namespace ds {
 	template <typename elem_t,
-			  elem_t init,
-			  typename plus_t,
-			  typename minus_t,
-			  typename scalar_multiply_t>
+			  elem_t init = elem_t(),
+			  typename plus_t = std::plus<elem_t>,
+			  typename minus_t = std::minus<elem_t>,
+			  typename scalar_multiply_t = std::multiplies<elem_t>>
 	class lazy_sum_segtree
 		: public sum_segtree<elem_t, init, plus_t> {
 	public:
