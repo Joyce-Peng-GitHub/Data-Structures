@@ -7,7 +7,6 @@ namespace ds {
 	template <typename elem_t,
 			  elem_t init = elem_t(),
 			  typename plus_t = std::plus<elem_t>,
-			  typename minus_t = std::minus<elem_t>,
 			  typename scalar_multiply_t = std::multiplies<elem_t>>
 	class lazy_sum_segtree
 		: public sum_segtree<elem_t, init, plus_t> {
@@ -73,14 +72,6 @@ namespace ds {
 							_diff);
 			}
 		}
-		inline void subtract(size_t _pos, size_t _n, const elem_t &_diff) {
-			this->__range_check(_pos);
-			if (_n) {
-				this->__subtract(0, 0, this->size(),
-								 _pos, std::min(_pos + _n, this->size()),
-								 _diff);
-			}
-		}
 		inline elem_t query(size_t _pos, size_t _n = 1) {
 			this->__range_check(_pos);
 			return (_n ? this->__query(0, 0, this->size(), _pos,
@@ -132,12 +123,11 @@ namespace ds {
 				this->__lazy[i] = init;
 			}
 		}
-		elem_t __modify(size_t _index, size_t _begin, size_t _end,
-						size_t _pos, const elem_t &_val) {
+		void __modify(size_t _index, size_t _begin, size_t _end,
+					  size_t _pos, const elem_t &_val) {
 			if (_begin + 1 == _end) {
-				elem_t &&diff = this->__inv(_val, this->__tree[_index]);
 				this->__tree[_index] = _val;
-				return diff;
+				return;
 			} // _index is a leaf node
 			/**
 			 * If _index is a leaf node,
@@ -145,14 +135,15 @@ namespace ds {
 			 */
 			this->__spread(_index, _begin, _end);
 			size_t mid = _begin + ((_end - _begin) >> 1);
-			elem_t &&diff =
-				((_pos < mid)
-					 ? this->__modify(__lchild(_index), _begin, mid,
-									  _pos, _val)
-					 : this->__modify(__rchild(_index), mid, _end,
-									  _pos, _val));
-			this->__tree[_index] = this->__oper(this->__tree[_index], diff);
-			return diff;
+			if (_pos < mid) {
+				this->__modify(__lchild(_index), _begin, mid,
+							   _pos, _val);
+			} else {
+				this->__modify(__rchild(_index), mid, _end,
+							   _pos, _val);
+			}
+			this->__tree[_index] = this->__oper(this->__tree[__lchild(_index)],
+												this->__tree[__rchild(_index)]);
 		}
 		void __add(size_t _index, size_t _node_begin, size_t _node_end,
 				   size_t _begin, size_t _end, const elem_t &_diff) {
@@ -180,38 +171,6 @@ namespace ds {
 				if (_end > node_mid) {
 					this->__add(__rchild(_index), node_mid, _node_end,
 								_begin, _end, _diff);
-				}
-				this->__tree[_index] =
-					this->__oper(this->__tree[__lchild(_index)],
-								 this->__tree[__rchild(_index)]);
-			}
-		}
-		void __subtract(size_t _index, size_t _node_begin, size_t _node_end,
-						size_t _begin, size_t _end, const elem_t &_diff) {
-			if (_begin <= _node_begin && _end >= _node_end) {
-				/* The entire segment is covered by the target range. */
-				this->__tree[_index] =
-					this->__inv(this->__tree[_index],
-								this->__mul(_node_end - _node_begin, _diff));
-				if (_node_begin + 1 != _node_end) {
-					this->__lazy[_index] = this->__inv(this->__lazy[_index],
-													   _diff);
-				} // not a leaf node
-			} else {
-				/**
-				 * If _index is a leaf node,
-				 * it must be covered entirely by the target range.
-				 */
-				this->__spread(_index, _node_begin, _node_end);
-				size_t node_mid = _node_begin +
-								  ((_node_end - _node_begin) >> 1);
-				if (_begin < node_mid) {
-					this->__subtract(__lchild(_index), _node_begin, node_mid,
-									 _begin, _end, _diff);
-				}
-				if (_end > node_mid) {
-					this->__subtract(__rchild(_index), node_mid, _node_end,
-									 _begin, _end, _diff);
 				}
 				this->__tree[_index] =
 					this->__oper(this->__tree[__lchild(_index)],

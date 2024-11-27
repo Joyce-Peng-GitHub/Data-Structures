@@ -16,11 +16,11 @@ namespace ds {
 
 	template <typename elem_t, elem_t init>
 	struct __segtree_helper<elem_t, init, std::plus<elem_t>> {
-		using tree_t = sum_segtree<elem_t, init, std::plus<elem_t>, std::minus<elem_t>>;
+		using tree_t = sum_segtree<elem_t, init, std::plus<elem_t>>;
 	};
 	template <typename elem_t, elem_t init>
 	struct __segtree_helper<elem_t, init, std::multiplies<elem_t>> {
-		using tree_t = sum_segtree<elem_t, init, std::multiplies<elem_t>, std::divides<elem_t>>;
+		using tree_t = sum_segtree<elem_t, init, std::multiplies<elem_t>>;
 	};
 
 	template <typename elem_t,
