@@ -1,293 +1,236 @@
 #ifndef _RATIONAL_HPP
 #define _RATIONAL_HPP
 
-#include <cmath>
-#include <cstdint>
-#include <exception>
-#include <iostream>
+#include "unsigned_rational.hpp"
 
 namespace ds {
+
 	template <typename uint_t = uint64_t>
-	class unsigned_rational {
+	class rational {
 	public:
 		using ur_t = unsigned_rational<uint_t>;
+		using r_t = rational<uint_t>;
 
-		inline static uint_t gcd(uint_t _x, uint_t _y) {
-			uint_t temp = _y;
-			if (_x < _y) {
-				_y = _x;
-				_x = temp;
-			}
-			while (_y) {
-				temp = _y;
-				_y = _x % _y;
-				_x = temp;
-			}
-			return _x;
+		ur_t abs;
+
+		rational(const uint_t &_num = 0, const uint_t &_den = 1,
+				 bool _nega = false)
+			: abs(_num, _den), __nega(_nega && _num) {}
+		rational(const ur_t &_u, bool _nega = false)
+			: abs(_u), __nega(_nega && _u.__num) {}
+
+		inline r_t &assign(const uint_t &_num = 0, const uint_t &_den = 1,
+						   bool _nega = false) {
+			this->abs.assign(_num, _den);
+			this->__nega = (_nega && _num);
+			return *this;
 		}
-		inline static uint_t lcm(uint_t _x, uint_t _y) {
-			return (_x / gcd(_x, _y));
+		inline r_t &assign(const ur_t &_ur, bool _nega) {
+			this->abs.assign(_ur);
+			this->__nega = (_nega && _ur.__num);
+			return *this;
+		}
+		inline r_t &assign(const r_t &_r) {
+			this->abs.assign(_r.abs);
+			this->__nega = _r.__nega;
+			return *this;
 		}
 
-		inline uint_t numerator() const { return this->__num; }
-		inline uint_t denominator() const { return this->__den; }
+		inline static r_t zero() { return {}; }
+		inline static r_t one() { return 1; }
+		inline static r_t posiinf() { return {1, 0}; }
+		inline static r_t negainf() { return {1, 0, true}; }
+		inline static r_t nan() { return {0, 0}; }
 
-		inline bool iszero() const { return (!this->__num && this->__den); }
-		inline bool isone() const { return (this->__num == this->__den); }
-		inline bool isfinite() const { return this->__den; }
-		inline bool isinf() const { return (this->num && !this->__den); }
-		inline bool isnan() const { return (!this->__num && !this->__den); }
+		inline uint_t numerator() const { return this->abs.__num; }
+		inline uint_t denominator() const { return this->abs.__den; }
 
-		unsigned_rational(uint_t _num = 0, uint_t _den = 1)
-			: __num(_num), __den(_den) { this->__normalize(); }
-
-		inline ur_t reciprocol() const {
-			return (this->isfinite()
-						? ur_t(this->__den, this->__num)
-						: (this->__num ? zero() : nan()));
+		inline bool iszero() const { return this->abs.iszero(); }
+		inline bool isone() const {
+			return (!this->__nega && this->abs.isone());
 		}
-		inline ur_t inverse() const { return this->reciprocol(); }
-
-		inline static ur_t zero() { return {0, 1}; }
-		inline static ur_t one() { return {1, 1}; }
-		inline static ur_t inf() { return {1, 0}; }
-		inline static ur_t nan() { return {0, 0}; }
-
-		inline static bool equal(const ur_t &_lhs, const ur_t &_rhs) {
-			return ((_lhs.__num == _rhs.__num) && (_lhs.__den == _rhs.__den));
+		inline bool ispositive() const {
+			return (!this->__nega && this->abs.__num);
 		}
-		inline static bool not_equal(const ur_t &_lhs, const ur_t &_rhs) {
+		inline bool isnegative() const {
+			return (this->__nega && this->abs.__num);
+		}
+		inline bool isfinite() const { return this->abs.isfinite(); }
+		inline bool isinf() const { return this->abs.isinf(); }
+		inline bool isnan() const { return this->abs.isnan(); }
+		inline bool notnan() const { return this->abs.notnan(); }
+		inline bool isposiinf() const {
+			return (!this->__nega && this->abs.isinf());
+		}
+		inline bool isnegainf() const {
+			return (this->__nega && this->abs.isinf());
+		}
+		inline int sign() const {
+			return (this->__nega ? -1 : (this->abs.__num ? 1 : 0));
+		}
+		inline r_t negate() const {
+			return {this->abs, !this->__nega};
+		}
+		inline r_t &tonegative() {
+			this->__nega = !this->__nega;
+			return *this;
+		}
+		inline r_t reciprocol() const {
+			return {this->abs.__den, this->abs.__num, this->__nega};
+		}
+		inline r_t &toreciprocol() {
+			this->abs.toreciprocol();
+			return *this;
+		}
+		inline r_t operator-() const { return this->negate(); }
+
+		inline operator long double() const {
+			return (this->__nega
+						? -static_cast<long double>(this->abs)
+						: static_cast<long double>(this->abs));
+		}
+		inline operator std::string() const {
+			return ((this->__nega && this->isfinite())
+						? ('-' + static_cast<std::string>(this->abs))
+						: static_cast<std::string>(this->abs));
+		}
+
+		inline static bool equal(const r_t &_lhs, const r_t &_rhs) {
+			return (_lhs.__nega == _rhs.__nega &&
+					_lhs.abs == _rhs.abs);
+		}
+		inline static bool not_equal(const r_t &_lhs, const r_t &_rhs) {
 			return !equal(_lhs, _rhs);
 		}
-		inline static bool less(const ur_t &_lhs, const ur_t &_rhs) {
-			return (static_cast<long double>(_lhs) <
-					static_cast<long double>(_rhs));
+		inline static bool less(const r_t &_lhs, const r_t &_rhs) {
+			return ((_lhs.__nega == _rhs.__nega)
+						? (_lhs.__nega
+							   ? (_lhs.abs > _rhs.abs)
+							   : (_lhs.abs < _rhs.abs))
+						: (_lhs.__nega > _rhs.__nega));
 		}
-		inline static bool less_equal(const ur_t &_lhs, const ur_t &_rhs) {
-			return (static_cast<long double>(_lhs) <=
-					static_cast<long double>(_rhs));
+		inline static bool less_equal(const r_t &_lhs, const r_t &_rhs) {
+			return ((_lhs.__nega == _rhs.__nega)
+						? (_lhs.__nega
+							   ? (_lhs.abs >= _rhs.abs)
+							   : (_lhs.abs <= _rhs.abs))
+						: (_lhs.__nega > _rhs.__nega));
 		}
-		inline static bool greater(const ur_t &_lhs, const ur_t &_rhs) {
-			return (static_cast<long double>(_lhs) >
-					static_cast<long double>(_rhs));
+		inline static bool greater(const r_t &_lhs, const r_t &_rhs) {
+			return less(_rhs, _lhs);
 		}
-		inline static bool greater_equal(const ur_t &_lhs, const ur_t &_rhs) {
-			return (static_cast<long double>(_lhs) >=
-					static_cast<long double>(_rhs));
+		inline static bool greater_equal(const r_t &_lhs, const r_t &_rhs) {
+			return less_equal(_rhs, _lhs);
 		}
-		inline friend bool operator==(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend bool operator==(const r_t &_lhs, const r_t &_rhs) {
 			return equal(_lhs, _rhs);
 		}
-		inline friend bool operator!=(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend bool operator!=(const r_t &_lhs, const r_t &_rhs) {
 			return not_equal(_lhs, _rhs);
 		}
-		inline friend bool operator<(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend bool operator<(const r_t &_lhs, const r_t &_rhs) {
 			return less(_lhs, _rhs);
 		}
-		inline friend bool operator<=(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend bool operator<=(const r_t &_lhs, const r_t &_rhs) {
 			return less_equal(_lhs, _rhs);
 		}
-		inline friend bool operator>(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend bool operator>(const r_t &_lhs, const r_t &_rhs) {
 			return greater(_lhs, _rhs);
 		}
-		inline friend bool operator>=(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend bool operator>=(const r_t &_lhs, const r_t &_rhs) {
 			return greater_equal(_lhs, _rhs);
 		}
 
-		inline operator uint_t() const { return (__num / __den); }
-		inline operator long double() const {
-			return (this->__num / static_cast<long double>(this->__num));
-		}
-		inline operator std::string() const {
-			return (this->__den
-						? (std::to_string(this->__num) + '/' +
-						   std::to_string(this->__den))
-						: (this->__num ? "inf" : "nan"));
-		}
-
-		/**
-		 * f1 + f2 == f3
-		 * inf + f == inf
-		 * nan + f == nan
-		 * inf + f == inf
-		 * inf + inf == inf
-		 * nan + inf == nan
-		 * nan + nan == nan
-		 */
-		inline ur_t &plus_equal(const ur_t &_rhs) {
-			if (this->isfinite()) {
-				if (_rhs.isfinite()) {
-					uint_t d = gcd(this->__den, _rhs.__den);
-					this->__num = _rhs.__den / d * this->__num +
-								  this->__den / d * _rhs.__num;
-					this->__den *= _rhs.__den / d;
-				} else if (_rhs.__num) { // _rhs == inf
-					*this = inf();
-				} else { // _rhs == nan
-					*this = nan();
+		inline r_t &plus_equal(const r_t &_rhs) {
+			if (this->__nega == _rhs.__nega) {
+				this->abs += _rhs.abs;
+			} else {
+				if (this->abs >= _rhs.abs) {
+					this->abs.__minus_equal(_rhs.abs);
+				} else {
+					ur_t rhsabs = _rhs.abs;
+					this->__nega = _rhs.__nega;
+					this->abs = rhsabs.__minus_equal(this->abs);
 				}
-			} else if (this->__num) { // *this == inf
-				if (_rhs.isnan()) {
-					*this = nan();
-				}
-				/* Otherwise let *this stay still */
 			}
+			this->__check_and_negate();
 			return *this;
 		}
-		inline static ur_t plus(ur_t _lhs, const ur_t &_rhs) {
+		inline static r_t plus(r_t _lhs, const r_t &_rhs) {
 			return _lhs.plus_equal(_rhs);
 		}
-		inline ur_t &minus_equal(const ur_t &_rhs) {
-			if (*this >= _rhs) {
-				return __minus_equal(_rhs);
-			}
-			if (!_rhs.isnan()) {
-				std::__throw_invalid_argument(
-					("unsigned_rational::minus_equal: _rhs (which is " +
-					 std::string(_rhs) + ") > *this (which is " +
-					 std::string(*this) + ')')
-						.c_str());
-			}
-			std::__throw_invalid_argument(
-				"unsigned_rational::minus_equal: _rhs is nan");
+		inline r_t &minus_equal(r_t _rhs) {
+			return this->plus_equal(_rhs.tonegative());
 		}
-		inline static ur_t minus(ur_t _lhs, const ur_t &_rhs) {
-			return _lhs.minus_equal(_rhs);
+		inline static r_t minus(r_t _lhs, r_t _rhs) {
+			return _lhs.plus_equal(_rhs.tonegative());
 		}
-		/**
-		 * f1 * f2 == f3
-		 * inf * 0 == nan
-		 * inf * f == inf
-		 * inf * inf == inf
-		 * nan * f == nan
-		 * nan * inf == nan
-		 * nan * nan == nan
-		 */
-		inline ur_t &multiplies_equal(const ur_t &_rhs) {
-			if (this->isfinite()) {
-				if (_rhs.isfinite()) {
-					this->__num =
-						this->__num / gcd(this->__num, _rhs.__den) *
-						_rhs.__num;
-					this->__den =
-						this->__den / gcd(this->__den, _rhs.__num) *
-						_rhs.__den;
-				} else if (_rhs.__num) {			 // _rhs == inf
-					this->__den = 0;				 // set *this to inf
-				} else {							 // _rhs == nan
-					this->__num = (this->__den = 0); // set *this to nan
-				}
-			} else if (this->__num) { // *this == inf
-				if (_rhs.isnan()) {
-					this->__num = 0;
-				}
-			}
+		inline r_t &multiplies_equal(const r_t &_rhs) {
+			this->__nega ^= this->__nega;
+			this->abs *= _rhs.abs;
+			this->__check_and_negate();
 			return *this;
 		}
-		inline static ur_t multiplies(ur_t _lhs, const ur_t &_rhs) {
+		inline static r_t multiplies(r_t _lhs, const r_t &_rhs) {
 			return _lhs.multiplies_equal(_rhs);
 		}
-		inline ur_t &divides_equal(const ur_t &_rhs) {
+		inline r_t &divides_equal(const r_t &_rhs) {
 			return this->multiplies_equal(_rhs.reciprocol());
 		}
-		inline static ur_t divides(ur_t _lhs, const ur_t &_rhs) {
+		inline static r_t divides(r_t _lhs, const r_t &_rhs) {
 			return _lhs.divides_equal(_rhs);
 		}
-		inline ur_t &operator+=(const ur_t &_rhs) {
+		inline r_t &operator+=(const r_t &_rhs) {
 			return this->plus_equal(_rhs);
 		}
-		inline friend ur_t operator+(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend r_t operator+(const r_t &_lhs, const r_t &_rhs) {
 			return plus(_lhs, _rhs);
 		}
-		inline ur_t &operator-=(const ur_t &_rhs) {
+		inline r_t &operator-=(const r_t &_rhs) {
 			return this->minus_equal(_rhs);
 		}
-		inline friend ur_t operator-(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend r_t operator-(const r_t &_lhs, const r_t &_rhs) {
 			return minus(_lhs, _rhs);
 		}
-		inline ur_t &operator*=(const ur_t &_rhs) {
+		inline r_t &operator*=(const r_t &_rhs) {
 			return this->multiplies_equal(_rhs);
 		}
-		inline friend ur_t operator*(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend r_t operator*(const r_t &_lhs, const r_t &_rhs) {
 			return multiplies(_lhs, _rhs);
 		}
-		inline ur_t &operator/=(const ur_t &_rhs) {
+		inline r_t &operator/=(const r_t &_rhs) {
 			return this->divides_equal(_rhs);
 		}
-		inline friend ur_t operator/(const ur_t &_lhs, const ur_t &_rhs) {
+		inline friend r_t operator/(const r_t &_lhs, const r_t &_rhs) {
 			return divides(_lhs, _rhs);
 		}
-
-		inline friend std::istream &operator>>(std::istream &is, ur_t &_rhs) {
-			char ch;
-			is >> _rhs.__num;
-			if (!is.good()) {
-				_rhs.__num = 0;
-				_rhs.__den = 1;
-				goto RET;
+		inline friend std::istream &operator>>(std::istream &_is, r_t &_r) {
+			char sign;
+			_is >> sign;
+			_r.__nega = (sign == '-');
+			if (sign != '-' && sign != '+') {
+				_is.putback(sign);
 			}
-			is.get(ch);
-			if (is.fail() || ch != '/') {
-				std::cin.clear();
-				std::cin.putback(ch);
-				_rhs.__den = 1;
-				goto RET;
-			}
-			if (is >> _rhs.__den) {
-				_rhs.__normalize();
+			if (_is >> _r.abs) {
+				_r.__check_and_negate();
 			} else {
-				_rhs.__num = 0;
-				_rhs.__den = 1;
+				_r.assign();
 			}
-		RET:
-			return is;
+			return _is;
 		}
-		inline friend std::ostream &operator<<(std::ostream &os,
-											   const ur_t &_rhs) {
-			return (_rhs.isfinite()
-						? ((_rhs.__den == 1)
-							   ? (os << _rhs.__num)
-							   : (os << _rhs.__num << '/' << _rhs.__den))
-						: (_rhs.__num ? (os << INFINITY) : (os << NAN)));
+		inline friend std::ostream &operator<<(std::ostream &_os,
+											   const r_t &_r) {
+			return ((_r.isfinite() && _r.__nega) ? (_os << '-') : _os)
+				   << _r.abs;
 		}
 
 	protected:
-		uint_t __num, __den;
+		bool __nega;
 
-		inline void __normalize() {
-			if (this->__num && this->__den) {
-				uint_t d = gcd(this->__num, this->__den);
-				this->__num /= d;
-				this->__den /= d;
+		inline void __check_and_negate() {
+			if (this->__nega && !this->abs.__num) {
+				this->__nega = false;
 			}
-		}
-		/**
-		 * f1 - f2 == f3
-		 * f - inf == -inf
-		 * inf - f == inf
-		 * f - nan == nan
-		 * nan - f == nan
-		 * inf - inf == inf
-		 * nan - inf == nan
-		 * inf - nan == nan
-		 * nan - nan == nan
-		 *
-		 * __minus_equal assumes that *this >= _rhs.,
-		 * so *this must not be nan.
-		 */
-		inline ur_t &__minus_equal(const ur_t &_rhs) {
-			if (this->isfinite()) {
-
-				uint_t d = gcd(this->__den, _rhs.__den);
-				this->__num = _rhs.__den / d * this->__num -
-							  this->__den / d * _rhs.__num;
-				this->__den *= _rhs.__den / d;
-			} else if (this->__num) { // *this == inf
-				if (!_rhs.__den) {	  // _rhs == inf
-					*this = nan();	  // inf - inf == nan
-				}
-			}
-			return *this;
 		}
 
 	private:
