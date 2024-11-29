@@ -38,8 +38,8 @@ namespace ds {
 
 		inline static r_t zero() { return {}; }
 		inline static r_t one() { return 1; }
-		inline static r_t posiinf() { return {1, 0}; }
-		inline static r_t negainf() { return {1, 0, true}; }
+		inline static r_t posinf() { return {1, 0}; }
+		inline static r_t neginf() { return {1, 0, true}; }
 		inline static r_t nan() { return {0, 0}; }
 
 		inline uint_t numerator() const { return abs.__num; }
