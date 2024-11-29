@@ -69,10 +69,12 @@ namespace ds {
 			return (__neg ? -1 : (abs.__num ? 1 : 0));
 		}
 		inline r_t opposite() const {
-			return {abs, !__neg};
+			return {abs, (abs.__num && !__neg)};
 		}
 		inline r_t &toopposite() {
-			__neg = !__neg;
+			if (abs.__num) {
+				__neg = !__neg;
+			}
 			return *this;
 		}
 		inline r_t reciprocal() const {
