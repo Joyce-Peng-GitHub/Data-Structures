@@ -7,7 +7,6 @@
 namespace ds {
 	template <typename elem_t,
 			  typename oper_t = std::plus<elem_t>,
-			  typename inv_t = std::minus<elem_t>,
 			  elem_t init = elem_t()>
 	class fenwicktree {
 	public:
@@ -36,27 +35,20 @@ namespace ds {
 				this->__tree[_index] = this->__oper(this->__tree[_index], _diff);
 			}
 		}
-		inline void subtract(size_t _index, const elem_t &_diff) {
-			this->__range_check(_index);
-			for (++_index; _index < this->__tree.size(); _index += lowbit(_index)) {
-				this->__tree[_index] = this->__inv(this->__tree[_index], _diff);
+		inline elem_t query(size_t _n = -1) const {
+			if (_n >= __tree.size()) {
+				_n = __tree.size() - 1;
 			}
-		}
-		inline elem_t prefix_sum(size_t _n) const {
 			elem_t res = init;
 			for (; _n; _n -= lowbit(_n)) {
 				res = this->__oper(res, this->__tree[_n]);
 			}
 			return res;
 		}
-		inline elem_t range_sum(size_t _index, size_t _n) const {
-			return this->__inv(this->prefix_sum(_index + _n), this->prefix_sum(_index));
-		}
 
 	protected:
 		std::vector<elem_t> __tree;
 		oper_t __oper;
-		inv_t __inv;
 
 		inline void __range_check(size_t _index) const {
 			if (_index + 1 >= this->__tree.size()) {

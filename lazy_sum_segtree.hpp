@@ -1,13 +1,14 @@
 #ifndef _LAZY_SUM_SEGTREE_HPP
 #define _LAZY_SUM_SEGTREE_HPP
 
+#include "group.hpp"
 #include "sum_segtree.hpp"
 
 namespace ds {
 	template <typename elem_t,
 			  elem_t init = elem_t(),
 			  typename plus_t = std::plus<elem_t>,
-			  typename scalar_multiply_t = std::multiplies<elem_t>>
+			  typename scalar_multiplies_t = scalar_multiplies<size_t, elem_t>>
 	class lazy_sum_segtree
 		: public sum_segtree<elem_t, init, plus_t> {
 	public:
@@ -84,7 +85,7 @@ namespace ds {
 		using base_t::__rchild;
 
 		std::vector<elem_t> __lazy; // leaf nodes don't need lazy tags
-		scalar_multiply_t __mul;	// scalar multiplication functor
+		scalar_multiplies_t __mul;	// scalar multiplication functor
 
 		inline void __spread(size_t _index, size_t _begin, size_t _end) {
 			if (this->__lazy[_index] != init) {

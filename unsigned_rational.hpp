@@ -56,16 +56,15 @@ namespace ds {
 		inline bool isnan() const { return (!this->__num && !this->__den); }
 		inline bool notnan() const { return (this->__num && this->__den); }
 
-		inline ur_t reciprocol() const {
+		inline ur_t reciprocal() const {
 			return (this->isfinite()
 						? ur_t(this->__den, this->__num)
 						: (this->__num ? zero() : nan()));
 		}
-		inline ur_t &toreciprocol() {
+		inline ur_t &toreciprocal() {
 			std::swap(this->__den, this->__num);
 			return *this;
 		}
-		inline ur_t inverse() const { return this->reciprocol(); }
 
 		inline operator uint_t() const { return (__num / __den); }
 		inline operator long double() const {
@@ -200,7 +199,7 @@ namespace ds {
 			return _lhs.multiplies_equal(_rhs);
 		}
 		inline ur_t &divides_equal(const ur_t &_rhs) {
-			return this->multiplies_equal(_rhs.reciprocol());
+			return this->multiplies_equal(_rhs.reciprocal());
 		}
 		inline static ur_t divides(ur_t _lhs, const ur_t &_rhs) {
 			return _lhs.divides_equal(_rhs);
