@@ -5,9 +5,9 @@
 #include <vector>
 
 namespace ds {
-	template <typename elem_t,
-			  typename oper_t = std::plus<elem_t>,
-			  elem_t init = elem_t()>
+	template <typename T,
+			  typename Oper = std::plus<T>,
+			  T init = T()>
 	class fenwicktree {
 	public:
 		inline static size_t lowbit(size_t x) { return (x & (-x)); }
@@ -24,22 +24,22 @@ namespace ds {
 		inline size_t treesize() const { return this->__tree.size(); }
 		inline size_t size() const { return (this->__tree.size() - 1); }
 		template <typename iter_t>
-		inline void build(iter_t _begin, iter_t _end) {
+		inline void assign(iter_t _begin, iter_t _end) {
 			this->__tree.resize(std::distance(_begin, _end) + 1);
 			std::copy(_begin, _end, this->__tree.begin() + 1);
 			this->__build();
 		}
-		inline void add(size_t _index, const elem_t &_diff) {
+		inline void add(size_t _index, const T &_diff) {
 			this->__range_check(_index);
 			for (++_index; _index < this->__tree.size(); _index += lowbit(_index)) {
 				this->__tree[_index] = this->__oper(this->__tree[_index], _diff);
 			}
 		}
-		inline elem_t query(size_t _n = -1) const {
+		inline T query(size_t _n = -1) const {
 			if (_n >= __tree.size()) {
 				_n = __tree.size() - 1;
 			}
-			elem_t res = init;
+			T res = init;
 			for (; _n; _n -= lowbit(_n)) {
 				res = this->__oper(res, this->__tree[_n]);
 			}
@@ -47,8 +47,8 @@ namespace ds {
 		}
 
 	protected:
-		std::vector<elem_t> __tree;
-		oper_t __oper;
+		std::vector<T> __tree;
+		Oper __oper;
 
 		inline void __range_check(size_t _index) const {
 			if (_index + 1 >= this->__tree.size()) {
