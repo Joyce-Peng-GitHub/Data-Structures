@@ -7,16 +7,16 @@
 namespace ds {
 	template <typename T,
 			  typename Oper = std::plus<T>,
-			  T init = T()>
+			  T id_elem = T()>
 	class fenwicktree {
 	public:
 		inline static size_t lowbit(size_t x) { return (x & (-x)); }
 
-		inline fenwicktree(size_t _n = 0) : __tree(_n + 1, init) {}
+		inline fenwicktree(size_t _n = 0) : __tree(_n + 1, id_elem) {}
 		template <typename iter_t>
 		inline fenwicktree(iter_t _begin, iter_t _end)
 			: __tree(std::distance(_begin, _end) + 1) {
-			this->__tree.front() = init;
+			this->__tree.front() = id_elem;
 			std::copy(_begin, _end, this->__tree.begin() + 1);
 			this->__build();
 		}
@@ -29,7 +29,7 @@ namespace ds {
 			std::copy(_begin, _end, this->__tree.begin() + 1);
 			this->__build();
 		}
-		inline void add(size_t _index, const T &_diff) {
+		inline void modify(size_t _index, const T &_diff) {
 			this->__range_check(_index);
 			for (++_index; _index < this->__tree.size(); _index += lowbit(_index)) {
 				this->__tree[_index] = this->__oper(this->__tree[_index], _diff);
@@ -39,11 +39,14 @@ namespace ds {
 			if (_n >= __tree.size()) {
 				_n = __tree.size() - 1;
 			}
-			T res = init;
+			T res = id_elem;
 			for (; _n; _n -= lowbit(_n)) {
 				res = this->__oper(res, this->__tree[_n]);
 			}
 			return res;
+		}
+		inline T operator[](size_t _n) const {
+			return this->query(_n);
 		}
 
 	protected:
