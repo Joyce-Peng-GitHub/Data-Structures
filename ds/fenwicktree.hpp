@@ -5,9 +5,10 @@
 #include <vector>
 
 namespace ds {
+	using std::size_t;
+
 	template <typename T, typename Oper = std::plus<T>, T id_elem = T()>
 	class fenwicktree {
-		using std::size_t;
 
 	public:
 		inline static size_t lowbit(size_t x) { return (x & (-x)); }
@@ -17,7 +18,7 @@ namespace ds {
 			m_tree.front() = id_elem;
 			m_build();
 		}
-		template <typename Iter>
+		template <typename Iter, typename = std::_RequireInputIter<Iter>>
 		inline fenwicktree(Iter begin, Iter end)
 			: m_tree(std::distance(begin, end) + 1) {
 			m_tree.front() = id_elem;
@@ -31,13 +32,13 @@ namespace ds {
 		inline void assign(std::initializer_list<T> list) {
 			assign(list.begin(), list.end());
 		}
-		inline void assign(size() n = 0) { m_tree.assign(n + 1, id_elem); }
+		inline void assign(size_t n = 0) { m_tree.assign(n + 1, id_elem); }
 		inline void assign(size_t n, const T &value) {
 			m_tree.assign(n + 1, value);
 			m_tree.front() = id_elem;
 			m_build();
 		}
-		template <typename Iter>
+		template <typename Iter, typename = std::_RequireInputIter<Iter>>
 		inline void assign(Iter begin, Iter end) {
 			m_tree.resize(std::distance(begin, end) + 1);
 			std::copy(begin, end, m_tree.begin() + 1);
