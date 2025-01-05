@@ -47,6 +47,31 @@ namespace ds {
 		inline friend bigint operator<<(bigint lhs, size_t n) {
 			return (lhs <<= n);
 		}
+		inline bigint &operator>>=(size_t n) {
+			if (m_data.empty()) {
+				return *this;
+			}
+			size_t m = (n >> LOG_BITS); // m = n / BITS
+			if (m >= m_data.size()) {
+				m_data.clear();
+				return *this;
+			}
+			n &= BITS - 1; // n %= BITS
+			if (!n) {
+				m_data.erase(m_data.begin(), m_data.begin() + m);
+				return *this;
+			}
+			for (size_t i = 0; i + m + 1 != m_data.size(); ++i) {
+				m_data[i] = ((m_data[i + m] >> n) | (m_data[i + m + 1] << (BITS - n)));
+			}
+			if (m_data.back() >> n) {
+				m_data[m_data.size() - m - 1] = (m_data.back() >> n);
+			} else {
+				++m;
+			}
+			m_data.resize(m_data.size() - m);
+			return *this;
+		}
 
 	protected:
 		std::vector<uint64_t> m_data;
