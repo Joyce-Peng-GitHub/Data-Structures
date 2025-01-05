@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <vector>
 
+#include "ds_internal.hpp"
+
 namespace ds {
 	using std::size_t;
 
@@ -18,7 +20,7 @@ namespace ds {
 			m_tree.front() = id_elem;
 			m_build();
 		}
-		template <typename Iter, typename = std::_RequireInputIter<Iter>>
+		template <typename Iter, typename = internal::RequireInputIter<Iter>>
 		inline fenwicktree(Iter begin, Iter end)
 			: m_tree(std::distance(begin, end) + 1) {
 			m_tree.front() = id_elem;
@@ -38,7 +40,7 @@ namespace ds {
 			m_tree.front() = id_elem;
 			m_build();
 		}
-		template <typename Iter, typename = std::_RequireInputIter<Iter>>
+		template <typename Iter, typename = internal::RequireInputIter<Iter>>
 		inline void assign(Iter begin, Iter end) {
 			m_tree.resize(std::distance(begin, end) + 1);
 			std::copy(begin, end, m_tree.begin() + 1);
