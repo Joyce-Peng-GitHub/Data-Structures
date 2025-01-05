@@ -12,7 +12,7 @@ namespace ds {
 	public:
 		inline static size_t lowbit(size_t x) { return (x & (-x)); }
 
-		inline fenwicktree(size_t n = 0) : m_tree(n + 1, id_elem) {}
+		inline explicit fenwicktree(size_t n = 0) : m_tree(n + 1, id_elem) {}
 		inline fenwicktree(size_t n, const T &value) : m_tree(n + 1, value) {
 			m_tree.front() = id_elem;
 			m_build();
