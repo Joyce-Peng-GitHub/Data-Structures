@@ -7,7 +7,7 @@
 #include "ds_internal.hpp"
 
 namespace ds {
-	using std::size_t;
+	using size_t = std::size_t;
 
 	template <typename T, typename Oper = std::plus<T>, T id_elem = T()>
 	class fenwicktree {
