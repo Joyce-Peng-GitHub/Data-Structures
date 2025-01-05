@@ -12,7 +12,11 @@ namespace ds {
 	public:
 		inline static size_t lowbit(size_t x) { return (x & (-x)); }
 
-		inline fenwicktree(size_t n) : m_tree(n + 1, id_elem) {}
+		inline fenwicktree(size_t n = 0) : m_tree(n + 1, id_elem) {}
+		inline fenwicktree(size_t n, const T &value) : m_tree(n + 1, value) {
+			m_tree.front() = id_elem;
+			m_build();
+		}
 		template <typename Iter>
 		inline fenwicktree(Iter begin, Iter end)
 			: m_tree(std::distance(begin, end) + 1) {
@@ -21,9 +25,18 @@ namespace ds {
 			m_build();
 		}
 
-		inline size_t treesize() const { return m_tree.size(); }
+		inline size_t tree_size() const { return m_tree.size(); }
 		inline size_t size() const { return (m_tree.size() - 1); }
 
+		inline void assign(std::initializer_list<T> list) {
+			assign(list.begin(), list.end());
+		}
+		inline void assign(size() n = 0) { m_tree.assign(n + 1, id_elem); }
+		inline void assign(size_t n, const T &value) {
+			m_tree.assign(n + 1, value);
+			m_tree.front() = id_elem;
+			m_build();
+		}
 		template <typename Iter>
 		inline void assign(Iter begin, Iter end) {
 			m_tree.resize(std::distance(begin, end) + 1);
