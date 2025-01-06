@@ -1,13 +1,17 @@
 #include <bits/stdc++.h>
 
-#include "../ds/fenwicktree.hpp"
 #include "../ds/bigint.hpp"
+#include "../ds/fenwicktree.hpp"
 
 void test_bigint() {
-	ds::bigint a(1<<16), b(1<<16);
+	ds::bigint a(1 << 16), b(1 << 16);
 	for (int i = 0; i < 100; ++i) {
-		a<<=1; b>>=1;
-		std::cout<<a<<' '<<b<<std::endl;
+		a <<= 1;
+		testOut(std::cout, a) << std::endl;
+	}
+	for (int i = 0; i < 120; ++i) {
+		a >>= 1;
+		testOut(std::cout, a) << std::endl;
 	}
 }
 
@@ -75,6 +79,6 @@ void test_fenwicktree() {
 
 int main() {
 	test_bigint();
-	//test_fenwicktree();
+	// test_fenwicktree();
 	return 0;
 }
