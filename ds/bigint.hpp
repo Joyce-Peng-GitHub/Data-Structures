@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include <vector>
+#include <iostream>
+#include <concepts>
 
 namespace ds {
 	class bigint {
@@ -13,7 +15,15 @@ namespace ds {
 		static constexpr size_t BITS = 64, LOG_BITS = 6;
 
 		inline bigint() = default;
+
+		inline bigint(std::integral auto x)
+			requires std::is_unsigned_v<decltype(x)>
+		: m_data(1, x) {
+			/* TODO: Implement this constructor for negative number */
+		}
 		inline bigint(int64_t x) : m_data(1, x) {}
+
+		/* TODO: Implement copy and move constructors */
 
 		inline bigint &operator<<=(size_t n) {
 			if (m_data.empty()) {
@@ -21,9 +31,9 @@ namespace ds {
 			}
 			size_t m = (n >> LOG_BITS); // m = n / BITS
 			n &= BITS - 1;				// n %= BITS
-			/**
+			/*
 			 * A right shift by 64 bits leads to undefined behavior.
-			 * So we need to handle seperately the case that n == 0
+			 * So we need to handle separately the case that n == 0
 			 * to avoid this problem.
 			 */
 			if (!n) {
@@ -73,9 +83,43 @@ namespace ds {
 			return *this;
 		}
 
+	    inline friend bool operator==(const bigint &lhs, const bigint &rhs) {
+            return lhs.m_data == rhs.m_data;
+        }
+
+		inline friend std::ostream &operator<<(std::ostream &os, const bigint &x);
+	    inline friend std::istream &operator>>(std::istream &is, bigint &x);
+
 	protected:
 		std::vector<uint64_t> m_data;
 	};
+
+	// cout operator
+	inline std::ostream &operator<<(std::ostream &os, const bigint &x) {
+        if (x.m_data.empty()) {
+            return os << 0;
+        }
+        os << x.m_data.back();
+        for (size_t i = x.m_data.size() - 1; i != 0; --i) {
+            os << std::setw(bigint::BITS) << std::setfill('0') << x.m_data[i - 1];
+        }
+        return os;
+    }
+
+    // cin operator
+	inline std::istream &operator>>(std::istream &is, bigint &x) {
+        std::string s;
+        is >> s;
+        x.m_data.clear();
+        size_t len = s.size();
+        for (size_t i = len; i >= bigint::BITS; i -= bigint::BITS) {
+            x.m_data.push_back(std::stoull(s.substr(i - bigint::BITS, bigint::BITS)));
+        }
+        if (len % bigint::BITS) {
+            x.m_data.push_back(std::stoull(s.substr(0, len % bigint::BITS)));
+        }
+        return is;
+    }
 }
 
 #endif
