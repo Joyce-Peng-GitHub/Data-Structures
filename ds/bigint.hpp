@@ -75,7 +75,16 @@ namespace ds {
 		inline friend bigint operator>>(bigint lhs, size_t n) {
 			return (lhs >>= n);
 		}
-		
+		inline friend bigint operator~(bigint x) {
+			size_t i = x.m_data.size() - 1;
+			for (; ~i && x.m_data[i] == static_cast<uint64_t>(-1); --i) {
+				x.m_data.pop_back();
+			}
+			for (; ~i; --i) {
+				x.m_data[i] = ~x.m_data[i];
+			}
+			return x;
+		}
 
 		inline friend std::ostream &testOut(std::ostream &os, const bigint &x) {
 			if (x.m_data.empty()) {
