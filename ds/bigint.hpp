@@ -74,6 +74,19 @@ namespace ds {
 			m_data.resize(m_data.size() - m);
 			return *this;
 		}
+		inline friend bigint operator>>(bigint lhs, size_t n) {
+			return (lhs >>= n);
+		}
+		inline friend bigint operator~(bigint x) {
+			size_t i = x.m_data.size() - 1;
+			for (; ~i && x.m_data[i] == static_cast<uint64_t>(-1); --i) {
+				x.m_data.pop_back();
+			}
+			for (; ~i; --i) {
+				x.m_data[i] = ~x.m_data[i];
+			}
+			return x;
+		}
 
 	    inline friend bool operator==(const bigint &lhs, const bigint &rhs) {
             return lhs.m_data == rhs.m_data;
