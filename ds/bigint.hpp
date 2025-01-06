@@ -72,6 +72,10 @@ namespace ds {
 			m_data.resize(m_data.size() - m);
 			return *this;
 		}
+		inline friend bigint operator>>(bigint lhs, size_t n) {
+			return (lhs >>= n);
+		}
+		
 
 		inline friend std::ostream &testOut(std::ostream &os, const bigint &x) {
 			if (x.m_data.empty()) {
