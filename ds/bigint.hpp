@@ -73,6 +73,17 @@ namespace ds {
 			return *this;
 		}
 
+		inline friend std::ostream &testOut(std::ostream &os, const bigint &x) {
+			if (x.m_data.empty()) {
+				return os << 0;
+			}
+			os << x.m_data.back();
+			for (size_t i = x.m_data.size() - 2; ~i; --i) {
+				os << ' ' << x.m_data[i];
+			}
+			return os;
+		}
+
 	protected:
 		std::vector<uint64_t> m_data;
 	};
