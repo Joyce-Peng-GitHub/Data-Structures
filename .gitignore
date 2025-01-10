@@ -1,1 +1,8 @@
-test/*.exe
+*.exe
+.*
+
+!.clang-format
+!.gitignore
+
+*build*/
+*debug*/
