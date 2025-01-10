@@ -132,7 +132,6 @@ namespace ds {
 			}
 			return res;
 		}
-
 		inline bigint &operator|=(const bigint &rhs) {
 			size_t i = 0;
 			for (; i != m_data.size() && i != rhs.m_data.size(); ++i) {
@@ -159,11 +158,57 @@ namespace ds {
 			return res;
 		}
 
+		inline bigint &operator^=(const bigint &rhs) {
+			if (m_data.size() == rhs.m_data.size()) {
+				size_t i = m_data.size() - 1;
+				while (~i && m_data[i] == rhs.m_data[i]) {
+					--i;
+				}
+				m_data.resize(i + 1);
+				for (; ~i; --i) {
+					m_data[i] ^= rhs.m_data[i];
+				}
+			} else if (m_data.size() < rhs.m_data.size()) {
+				for (size_t i = 0; i != m_data.size(); ++i) {
+					m_data[i] ^= rhs.m_data[i];
+				}
+				m_data.insert(m_data.end(), rhs.m_data.begin() + m_data.size(), rhs.m_data.end());
+			} else {
+				for (size_t i = 0; i != rhs.m_data.size(); ++i) {
+					m_data[i] ^= rhs.m_data[i];
+				}
+			}
+			return *this;
+		}
+		inline friend bigint operator^(const bigint &lhs, const bigint &rhs) {
+			bigint res;
+			if (lhs.m_data.size() == rhs.m_data.size()) {
+				size_t i = lhs.m_data.size() - 1;
+				while (~i && lhs.m_data[i] == rhs.m_data[i]) {
+					--i;
+				}
+				res.m_data.resize(i + 1);
+				for (; ~i; --i) {
+					res.m_data[i] = (lhs.m_data[i] ^ rhs.m_data[i]);
+				}
+			} else if (lhs.m_data.size() < rhs.m_data.size()) {
+				res.m_data.resize(rhs.m_data.size());
+				for (size_t i = 0; i != lhs.m_data.size(); ++i) {
+					res.m_data[i] = (lhs.m_data[i] ^ rhs.m_data[i]);
+				}
+				res.m_data.insert(res.m_data.end(),
+								  rhs.m_data.begin() + lhs.m_data.size(),
+								  rhs.m_data.end());
+			}
+			return res;
+		}
+
 		inline bool operator==(const bigint &other) const {
 			return m_data == other.m_data;
 		}
 
-		inline friend std::ostream &testOut(std::ostream &os, const bigint &x) {
+		inline friend std::ostream &testOut(std::ostream &os,
+											const bigint &x) {
 			if (x.m_data.empty()) {
 				return os << 0;
 			}
@@ -177,7 +222,7 @@ namespace ds {
 	protected:
 		std::vector<uint64_t> m_data;
 
-		inline void m_expand(size_t n) { // Suppose n >= m_data.size()
+		inline void m_signed_expand(size_t n) { // Suppose n >= m_data.size()
 			if (m_data.empty()) {
 				m_data.resize(n);
 			} else if (m_data.back() & (static_cast<uint64_t>(1) << (unit_bits - 1))) {
@@ -190,4 +235,4 @@ namespace ds {
 
 } // namespace ds
 
-#endif // _BIGUINT_HPP
+#endif // DS_BIGINT_HPP_

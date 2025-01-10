@@ -62,12 +62,10 @@ namespace ds {
 			}
 			return res;
 		}
-		inline T operator[](size_t n) const {
-			return query(n);
-		}
+		inline T operator[](size_t n) const { return query(n); }
 
 	protected:
-		std::vector<T> m_tree;
+		std::vector<T> m_tree; // m_trea[i] maintains the sum of data[i - lowbit(i), i)
 		Oper m_oper;
 
 		inline void m_range_check(size_t index) const {
