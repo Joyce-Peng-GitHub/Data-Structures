@@ -72,19 +72,19 @@ namespace ds {
 			if (m_data.empty()) {
 				return *this;
 			}
-			size_t m = (n >> log2(unit_bits)); // m = n / BITS
+			size_t m = (n >> log2(unit_bits)); // m = n / unit_bits
 			if (m >= m_data.size()) {
 				m_data.clear();
 				return *this;
 			}
-			n &= BITS - 1; // n %= BITS
+			n &= unit_bits - 1; // n %= unit_bits
 			if (!n) {
 				m_data.erase(m_data.begin(), m_data.begin() + m);
 				return *this;
 			}
 			for (size_t i = 0; i + m + 1 != m_data.size(); ++i) {
 				m_data[i] = ((m_data[i + m] >> n) |
-							 (m_data[i + m + 1] << (BITS - n)));
+							 (m_data[i + m + 1] << (unit_bits - n)));
 			}
 			if (m_data.back() >> n) {
 				m_data[m_data.size() - m - 1] = (m_data.back() >> n);
@@ -323,7 +323,7 @@ namespace ds {
 		inline void m_signed_expand(size_t n) { // Suppose n >= m_data.size()
 			if (m_data.empty()) {
 				m_data.resize(n);
-			} else if (m_data.back() & (static_cast<uint64_t>(1) << (BITS - 1))) {
+			} else if (m_data.back() & (static_cast<uint64_t>(1) << (unit_bits - 1))) {
 				m_data.resize(n, static_cast<uint64_t>(-1));
 			} else {
 				m_data.resize(n);
