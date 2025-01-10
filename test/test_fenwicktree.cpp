@@ -1,8 +1,21 @@
 #include <bits/stdc++.h>
 
+#include "../ds/bigint.hpp"
 #include "../ds/fenwicktree.hpp"
 
-int main() {
+void test_bigint() {
+	ds::bigint a(1 << 16), b(1 << 16);
+	for (int i = 0; i < 100; ++i) {
+		a <<= 1;
+		testOut(std::cout, a) << std::endl;
+	}
+	for (int i = 0; i < 120; ++i) {
+		a >>= 1;
+		testOut(std::cout, a) << std::endl;
+	}
+}
+
+void test_fenwicktree() {
 	ds::fenwicktree<int64_t> *p;
 	std::vector<int64_t> *q;
 	std::string cmd, op;
@@ -62,5 +75,10 @@ int main() {
 			break;
 		}
 	}
+}
+
+int main() {
+	test_bigint();
+	// test_fenwicktree();
 	return 0;
 }

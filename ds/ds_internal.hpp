@@ -9,7 +9,7 @@ namespace ds {
 		using RequireInputIter =
 			std::enable_if_t<
 				std::is_convertible<
-					std::iterator_traits<Iter>::iterator_category,
+					typename std::iterator_traits<Iter>::iterator_category,
 					std::input_iterator_tag>::value>;
 	}
 }
