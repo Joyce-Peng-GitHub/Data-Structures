@@ -2,9 +2,9 @@
 #define _BIGUINT_HPP
 
 #include <cstdint>
-#include <vector>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace ds {
 	// compile-time log2
@@ -29,18 +29,18 @@ namespace ds {
 		uint8_t static constexpr log_bits = log2(unit_bits);
 
 		inline bigint() = default;
-		inline bigint(unit_t const& x) : m_data(1, x) {}
-		inline bigint(std::string const& str) {
+		inline bigint(unit_t const &x) : m_data(1, x) {}
+		inline bigint(std::string const &str) {
 			/* TODO: Implement the constructor from string */
-        }
+		}
 		/* TODO: Implement copy and move constructors */
 
 		inline bigint &operator<<=(size_t n) {
 			if (m_data.empty()) {
 				return *this;
 			}
-			size_t m = (n >> log_bits); // m = n / unit_bits
-			n &= unit_bits - 1;			// n %= unit_bits
+			size_t m = (n >> log2(unit_bits)); // m = n / unit_bits
+			n &= unit_bits - 1;				   // n %= unit_bits
 			/*
 			 * A right shift by 64 bits leads to undefined behavior.
 			 * So we need to handle separately the case that n == 0
@@ -57,7 +57,7 @@ namespace ds {
 			}
 			for (size_t i = sz + m - 1; i != m; --i) {
 				m_data[i] = ((m_data[i - m] << n) |
-				 			 (m_data[i - m - 1] >> (unit_bits - n)));
+							 (m_data[i - m - 1] >> (unit_bits - n)));
 			}
 			m_data[m] = (m_data[0] << n);
 			for (size_t i = 0; i != m; ++i) {
@@ -72,7 +72,7 @@ namespace ds {
 			if (m_data.empty()) {
 				return *this;
 			}
-			size_t m = (n >> LOG_BITS); // m = n / BITS
+			size_t m = (n >> log2(unit_bits)); // m = n / BITS
 			if (m >= m_data.size()) {
 				m_data.clear();
 				return *this;
@@ -301,9 +301,9 @@ namespace ds {
 			return res;
 		}
 
-	    inline bool operator==(const bigint &other) {
-            return m_data == other.m_data;
-        }
+		inline bool operator==(const bigint &other) {
+			return m_data == other.m_data;
+		}
 
 		inline friend std::ostream &testOut(std::ostream &os,
 											const bigint &x) {
