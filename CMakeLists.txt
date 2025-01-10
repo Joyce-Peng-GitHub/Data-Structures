@@ -7,6 +7,6 @@ set(CMAKE_CXX_STANDARD 14)
 include_directories(ds)
 
 set(SOURCE_FILES
-        test/test_fenwicktree.cpp)
+        test/test.cpp)
 
 add_executable(Data_Structure ${SOURCE_FILES})
