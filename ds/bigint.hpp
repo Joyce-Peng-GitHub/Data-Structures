@@ -30,7 +30,7 @@ namespace ds {
 		uint8_t static constexpr log_bits = log2(unit_bits);
 
 		inline bigint() = default;
-		inline explicit bigint(const unit_t &x) : m_data(1, x) {}
+		inline bigint(unit_t x) : m_data(1, x) {}
 		inline bigint(const std::string &str) {
 			/* TODO: Implement the constructor from string */
 		}
