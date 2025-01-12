@@ -32,7 +32,8 @@ namespace ds {
 		inline bigint(const std::string &str) {
 			/* TODO: Implement the constructor from string */
 		}
-		/* TODO: Implement copy and move constructors */
+		inline bigint(const bigint &) = default;
+		inline bigint(bigint &&) = default;
 
 		inline bigint &operator<<=(size_t n) {
 			if (m_data.empty()) {
@@ -41,7 +42,7 @@ namespace ds {
 			size_t m = (n >> log_bits); // m = n / unit_bits
 			n &= unit_bits - 1;			// n %= unit_bits
 			if (!n) {
-				/*
+				/**
 				 * A right shift by 64 bits leads to undefined behavior.
 				 * So we need to handle separately the case that n == 0
 				 * to avoid this problem.
