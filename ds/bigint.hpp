@@ -9,13 +9,15 @@
 namespace ds {
 
 	// compile-time log2
-	static constexpr uint8_t log2(uint8_t n) {
-		uint8_t result = 0;
-		while (n > 1) {
-			n /= 2;
-			++result;
+	namespace {
+		constexpr uint8_t log2(uint8_t n) {
+			uint8_t result = 0;
+			while (n > 1) {
+				n /= 2;
+				++result;
+			}
+			return result;
 		}
-		return result;
 	}
 
 	class bigint {
