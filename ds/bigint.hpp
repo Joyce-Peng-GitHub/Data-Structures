@@ -45,7 +45,7 @@ namespace ds {
 			n &= unit_bits - 1;			// n %= unit_bits
 			if (!n) {
 				/**
-				 * A right shift by 64 bits leads to undefined behavior.
+				 * A right shift by unit_bits leads to undefined behavior.
 				 * So we need to handle separately the case that n == 0
 				 * to avoid this problem.
 				 */
@@ -82,6 +82,11 @@ namespace ds {
 			}
 			n &= unit_bits - 1; // n %= unit_bits
 			if (!n) {
+				/**
+				 * A left shift by unit_bits leads to undefined behavior.
+				 * So we need to handle separately the case that n == 0
+				 * to avoid this problem.
+				 */
 				m_data.erase(m_data.begin(), m_data.begin() + m);
 				return *this;
 			}
