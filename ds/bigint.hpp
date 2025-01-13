@@ -78,7 +78,7 @@ namespace ds {
 			if (!n) {
 				/**
 				 * A right shift by unit_bits leads to undefined behavior.
-				 * So we need to handle separately the case that n == 0
+				 * So we need to handle separately the case other n == 0
 				 * to avoid this problem.
 				 */
 				m_data.insert(m_data.begin(), m, 0);
@@ -99,8 +99,8 @@ namespace ds {
 			}
 			return *this;
 		}
-		inline friend bigint operator<<(bigint lhs, size_t n) {
-			return (lhs <<= n);
+		inline bigint operator<<(size_t n) const {
+			return (bigint(*this) <<= n);
 		}
 
 		inline bigint &operator>>=(size_t n) {
@@ -116,7 +116,7 @@ namespace ds {
 			if (!n) {
 				/**
 				 * A left shift by unit_bits leads to undefined behavior.
-				 * So we need to handle separately the case that n == 0
+				 * So we need to handle separately the case other n == 0
 				 * to avoid this problem.
 				 */
 				m_data.erase(m_data.begin(), m_data.begin() + m);
@@ -134,117 +134,134 @@ namespace ds {
 			m_data.resize(m_data.size() - m);
 			return *this;
 		}
-		inline friend bigint operator>>(bigint lhs, size_t n) {
-			return (lhs >>= n);
+		inline bigint operator>>(size_t n) const {
+			return (bigint(*this) >>= n);
 		}
 
-		inline friend bigint operator~(bigint x) {
-			size_t i = x.m_data.size() - 1;
-			for (; ~i && x.m_data[i] == static_cast<uint64_t>(-1); --i) {
-				x.m_data.pop_back();
+		inline bigint operator~() const {
+			bigint res;
+			size_t i = res.m_data.size() - 1;
+			while (~i && m_data[i] == static_cast<uint64_t>(-1)) {
+				--i;
 			}
+			res.m_data.resize(i + 1);
 			for (; ~i; --i) {
-				x.m_data[i] = ~x.m_data[i];
+				res.m_data[i] = ~this->m_data[i];
 			}
-			return x;
+			return res;
 		}
 
-		inline bigint &operator&=(const bigint &rhs) {
-			size_t i = std::min(m_data.size(), rhs.m_data.size()) - 1;
-			while (~i && !(m_data[i] & rhs.m_data[i])) {
+		inline bigint &operator&=(const bigint &other) {
+			size_t i = std::min(m_data.size(), other.m_data.size()) - 1;
+			while (~i && !(m_data[i] & other.m_data[i])) {
 				--i;
 			}
 			m_data.resize(i + 1);
 			for (; ~i; --i) {
-				m_data[i] &= rhs.m_data[i];
+				m_data[i] &= other.m_data[i];
 			}
 			return *this;
 		}
-		inline friend bigint operator&(const bigint &lhs, const bigint &rhs) {
-			size_t i = std::min(lhs.m_data.size(), rhs.m_data.size()) - 1;
-			while (~i && !(lhs.m_data[i] & rhs.m_data[i])) {
+		inline bigint operator&(const bigint &other) const {
+			bigint res;
+			size_t i = std::min(m_data.size(), other.m_data.size()) - 1;
+			while (~i && !(m_data[i] & other.m_data[i])) {
 				--i;
 			}
 			bigint res;
 			res.m_data.resize(i + 1);
 			for (; ~i; --i) {
-				res.m_data[i] = (lhs.m_data[i] & rhs.m_data[i]);
+				res.m_data[i] = (m_data[i] & other.m_data[i]);
 			}
 			return res;
 		}
-		inline bigint &operator|=(const bigint &rhs) {
+		inline bigint &operator|=(const bigint &other) {
 			size_t i = 0;
-			for (; i != m_data.size() && i != rhs.m_data.size(); ++i) {
-				m_data[i] |= rhs.m_data[i];
+			for (; i != m_data.size() && i != other.m_data.size(); ++i) {
+				m_data[i] |= other.m_data[i];
 			}
-			if (i != rhs.m_data.size()) {
-				m_data.insert(m_data.end(), rhs.m_data.begin() + i, rhs.m_data.end());
+			if (i != other.m_data.size()) {
+				m_data.insert(m_data.end(), other.m_data.begin() + i, other.m_data.end());
 			}
 			return *this;
 		}
-		inline friend bigint operator|(const bigint &lhs, const bigint &rhs) {
+		inline bigint operator|(const bigint &other) const {
 			bigint res;
-			res.m_data.resize(std::max(lhs.m_data.size(), rhs.m_data.size()));
+			res.m_data.resize(std::max(m_data.size(), other.m_data.size()));
 			size_t i = 0;
-			for (; i != lhs.m_data.size() && i != rhs.m_data.size(); ++i) {
-				res.m_data[i] = (lhs.m_data[i] | rhs.m_data[i]);
+			for (; i != m_data.size() && i != other.m_data.size(); ++i) {
+				res.m_data[i] = (m_data[i] | other.m_data[i]);
 			}
-			for (; i != lhs.m_data.size(); ++i) {
-				res.m_data[i] = lhs.m_data[i];
+			for (; i != m_data.size(); ++i) {
+				res.m_data[i] = m_data[i];
 			}
-			for (; i < rhs.m_data.size(); ++i) {
-				res.m_data[i] = rhs.m_data[i];
+			for (; i < other.m_data.size(); ++i) {
+				res.m_data[i] = other.m_data[i];
 			}
 			return res;
 		}
 
-		inline bigint &operator^=(const bigint &rhs) {
-			if (m_data.size() == rhs.m_data.size()) {
+		inline bigint &operator^=(const bigint &other) {
+			if (m_data.size() == other.m_data.size()) {
 				size_t i = m_data.size() - 1;
-				while (~i && m_data[i] == rhs.m_data[i]) {
+				while (~i && (m_data[i] == other.m_data[i] ||
+							  m_data[i] ^ other.m_data[i] ==
+											  static_cast<uint64_t>(-1))) {
 					--i;
 				}
 				m_data.resize(i + 1);
 				for (; ~i; --i) {
-					m_data[i] ^= rhs.m_data[i];
+					m_data[i] ^= other.m_data[i];
 				}
-			} else if (m_data.size() < rhs.m_data.size()) {
+			} else if (m_data.size() < other.m_data.size()) {
 				for (size_t i = 0; i != m_data.size(); ++i) {
-					m_data[i] ^= rhs.m_data[i];
+					m_data[i] ^= other.m_data[i];
 				}
-				m_data.insert(m_data.end(), rhs.m_data.begin() + m_data.size(), rhs.m_data.end());
+				m_data.insert(m_data.end(),
+							  other.m_data.begin() + m_data.size(),
+							  other.m_data.end());
 			} else {
-				for (size_t i = 0; i != rhs.m_data.size(); ++i) {
-					m_data[i] ^= rhs.m_data[i];
+				for (size_t i = 0; i != other.m_data.size(); ++i) {
+					m_data[i] ^= other.m_data[i];
 				}
 			}
 			return *this;
 		}
-		inline friend bigint operator^(const bigint &lhs, const bigint &rhs) {
+		inline bigint operator^(const bigint &other) const {
 			bigint res;
-			if (lhs.m_data.size() == rhs.m_data.size()) {
-				size_t i = lhs.m_data.size() - 1;
-				while (~i && lhs.m_data[i] == rhs.m_data[i]) {
+			if (m_data.size() == other.m_data.size()) {
+				size_t i = m_data.size() - 1;
+				while (~i && (m_data[i] == other.m_data[i] ||
+							  m_data[i] ^ other.m_data[i] ==
+											  static_cast<uint64_t>(-1))) {
 					--i;
 				}
 				res.m_data.resize(i + 1);
 				for (; ~i; --i) {
-					res.m_data[i] = (lhs.m_data[i] ^ rhs.m_data[i]);
+					res.m_data[i] = m_data[i] ^ other.m_data[i];
 				}
-			} else if (lhs.m_data.size() < rhs.m_data.size()) {
-				res.m_data.resize(rhs.m_data.size());
-				for (size_t i = 0; i != lhs.m_data.size(); ++i) {
-					res.m_data[i] = (lhs.m_data[i] ^ rhs.m_data[i]);
+			} else if (m_data.size() < other.m_data.size()) {
+				res.m_data.resize(other.m_data.size());
+				for (size_t i = 0; i != m_data.size(); ++i) {
+					res.m_data[i] = (m_data[i] ^ other.m_data[i]);
 				}
 				res.m_data.insert(res.m_data.end(),
-								  rhs.m_data.begin() + lhs.m_data.size(),
-								  rhs.m_data.end());
+								  other.m_data.begin() + m_data.size(),
+								  other.m_data.end());
+			} else {
+				res.m_data.resize(m_data.size());
+				for (size_t i = 0; i != other.m_data.size(); ++i) {
+					res.m_data[i] = (m_data[i] ^ other.m_data[i]);
+				}
+				res.m_data.insert(res.m_data.end(),
+								  m_data.begin() + other.m_data.size(),
+								  m_data.end());
 			}
 			return res;
 		}
 
 		inline bool operator==(const bigint &other) const {
-			return m_data == other.m_data;
+			return (m_data == other.m_data);
 		}
 
 		inline friend std::ostream &testOut(std::ostream &os,
@@ -265,7 +282,8 @@ namespace ds {
 		inline void m_signed_expand(size_t n) { // Suppose n >= m_data.size()
 			if (m_data.empty()) {
 				m_data.resize(n);
-			} else if (m_data.back() & (static_cast<uint64_t>(1) << (unit_bits - 1))) {
+			} else if (m_data.back() &
+					   (static_cast<uint64_t>(1) << (unit_bits - 1))) {
 				m_data.resize(n, static_cast<uint64_t>(-1));
 			} else {
 				m_data.resize(n);
