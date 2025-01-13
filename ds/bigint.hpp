@@ -37,6 +37,30 @@ namespace ds {
 		inline bigint(const bigint &) = default;
 		inline bigint(bigint &&) = default;
 
+		inline size_t size() const { return m_data.size(); }
+		inline size_t capacity() const { return m_data.capacity(); }
+
+		inline void reserve(size_t n) { m_data.reserve(n); }
+		inline void shrink_to_fit() { m_data.shrink_to_fit(); }
+
+		inline void resize() {
+			while (size() && (!m_data.back() ||
+							  m_data.back() == static_cast<uint64_t>(-1))) {
+				m_data.pop_back();
+			}
+		}
+		inline void resize(size_t n) {
+			if (n > size()) {
+				m_signed_expand(n);
+			} else if (n < size()) {
+				while (size() > n &&
+					   (!m_data.back() ||
+						m_data.back() == static_cast<uint64_t>(-1))) {
+					m_data.pop_back();
+				}
+			}
+		}
+
 		inline bigint &operator<<=(size_t n) {
 			if (m_data.empty()) {
 				return *this;
