@@ -43,19 +43,27 @@ namespace ds {
 		inline void reserve(size_t n) { m_data.reserve(n); }
 		inline void shrink_to_fit() { m_data.shrink_to_fit(); }
 
+		/**
+		 * @brief Removing all trailing 0s or -1s.
+		 */
 		inline void resize() {
 			while (size() && (!m_data.back() ||
-							  m_data.back() == static_cast<uint64_t>(-1))) {
+							  m_data.back() == static_cast<unit_t>(-1))) {
 				m_data.pop_back();
 			}
 		}
+		/**
+		 * @brief If @c n > @c size(), expand the number; if @c n < @c size(),
+		 * 	remove trailing 0s or -1s until @c n == @c size() or
+		 * 	there is no more trailing 0 or -1.
+		 */
 		inline void resize(size_t n) {
 			if (n > size()) {
 				m_signed_expand(n);
 			} else if (n < size()) {
 				while (size() > n &&
 					   (!m_data.back() ||
-						m_data.back() == static_cast<uint64_t>(-1))) {
+						m_data.back() == static_cast<unit_t>(-1))) {
 					m_data.pop_back();
 				}
 			}
