@@ -289,6 +289,10 @@ namespace ds {
 				m_data.resize(n);
 			}
 		}
+		inline static std::pair<bool, unit_t> s_plus_unit(unit_t a, unit_t b) {
+			unit_t sum = a + b;
+			return {(sum < a || sum < b), sum};
+		}
 	}; // class bigint
 
 } // namespace ds
