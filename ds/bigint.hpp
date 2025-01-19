@@ -261,6 +261,7 @@ namespace ds {
 		}
 
 		inline bool operator==(const bigint &other) const {
+			/* TODO: Implement the == operator for numbers with trailing 0s or -1s */
 			return (m_data == other.m_data);
 		}
 
