@@ -260,6 +260,31 @@ namespace ds {
 			return res;
 		}
 
+		inline bigint &operator+=(const bigint &other) {
+			if (m_data.size() < other.m_data.size()) {
+				m_signed_expand(other.m_data.size());
+			}
+			// m_data.size() >= other.m_data.size()
+			size_t i = 0;
+			bool carry = false;
+			std::pair<bool, unit_t> p = {false, 0}, q = {false, 0};
+			for (; i != other.m_data.size(); ++i) {
+				p = s_plus_unit(m_data[i], other.m_data[i]);
+				q = s_plus_unit(p.second, carry);
+				m_data[i] = q.second;
+				carry = (p.first || q.first);
+			}
+			for (; carry && i != m_data.size(); ++i) {
+				p = s_plus_unit(m_data[i], carry);
+				m_data[i] = p.second;
+				carry = p.first;
+			}
+			if (carry) {
+				m_data.push_back(1);
+			}
+			return *this;
+		}
+
 		inline bool operator==(const bigint &other) const {
 			/* TODO: Implement the == operator for numbers with trailing 0s or -1s */
 			return (m_data == other.m_data);
