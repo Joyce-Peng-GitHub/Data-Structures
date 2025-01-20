@@ -37,7 +37,7 @@ namespace ds {
 		inline bigint(const bigint &) = default;
 		inline bigint(bigint &&) = default;
 
-		inline size_t size() const { return m_data.size(); }
+		inline size_t size() const { return size(); }
 		inline size_t capacity() const { return m_data.capacity(); }
 
 		inline void reserve(size_t n) { m_data.reserve(n); }
@@ -84,7 +84,7 @@ namespace ds {
 				m_data.insert(m_data.begin(), m, 0);
 				return *this;
 			}
-			size_t sz = m_data.size();
+			size_t sz = size();
 			m_data.resize(sz + m);
 			if (m_data[sz - 1] >> (unit_bits - n)) {
 				m_data.push_back(m_data[sz - 1] >> (unit_bits - n));
@@ -108,7 +108,7 @@ namespace ds {
 				return *this;
 			}
 			size_t m = (n >> log_bits); // m = n / unit_bits
-			if (m >= m_data.size()) {
+			if (m >= size()) {
 				m_data.clear();
 				return *this;
 			}
@@ -122,16 +122,16 @@ namespace ds {
 				m_data.erase(m_data.begin(), m_data.begin() + m);
 				return *this;
 			}
-			for (size_t i = 0; i + m + 1 != m_data.size(); ++i) {
+			for (size_t i = 0; i + m + 1 != size(); ++i) {
 				m_data[i] = ((m_data[i + m] >> n) |
 							 (m_data[i + m + 1] << (unit_bits - n)));
 			}
 			if (m_data.back() >> n) {
-				m_data[m_data.size() - m - 1] = (m_data.back() >> n);
+				m_data[size() - m - 1] = (m_data.back() >> n);
 			} else {
 				++m;
 			}
-			m_data.resize(m_data.size() - m);
+			m_data.resize(size() - m);
 			return *this;
 		}
 		inline bigint operator>>(size_t n) const {
@@ -140,7 +140,7 @@ namespace ds {
 
 		inline bigint operator~() const {
 			bigint res;
-			size_t i = res.m_data.size() - 1;
+			size_t i = res.size() - 1;
 			while (~i && m_data[i] == static_cast<uint64_t>(-1)) {
 				--i;
 			}
@@ -152,7 +152,7 @@ namespace ds {
 		}
 
 		inline bigint &operator&=(const bigint &other) {
-			size_t i = std::min(m_data.size(), other.m_data.size()) - 1;
+			size_t i = std::min(size(), other.size()) - 1;
 			while (~i && !(m_data[i] & other.m_data[i])) {
 				--i;
 			}
@@ -164,7 +164,7 @@ namespace ds {
 		}
 		inline bigint operator&(const bigint &other) const {
 			bigint res;
-			size_t i = std::min(m_data.size(), other.m_data.size()) - 1;
+			size_t i = std::min(size(), other.size()) - 1;
 			while (~i && !(m_data[i] & other.m_data[i])) {
 				--i;
 			}
@@ -177,33 +177,33 @@ namespace ds {
 		}
 		inline bigint &operator|=(const bigint &other) {
 			size_t i = 0;
-			for (; i != m_data.size() && i != other.m_data.size(); ++i) {
+			for (; i != size() && i != other.size(); ++i) {
 				m_data[i] |= other.m_data[i];
 			}
-			if (i != other.m_data.size()) {
+			if (i != other.size()) {
 				m_data.insert(m_data.end(), other.m_data.begin() + i, other.m_data.end());
 			}
 			return *this;
 		}
 		inline bigint operator|(const bigint &other) const {
 			bigint res;
-			res.m_data.resize(std::max(m_data.size(), other.m_data.size()));
+			res.m_data.resize(std::max(size(), other.size()));
 			size_t i = 0;
-			for (; i != m_data.size() && i != other.m_data.size(); ++i) {
+			for (; i != size() && i != other.size(); ++i) {
 				res.m_data[i] = (m_data[i] | other.m_data[i]);
 			}
-			for (; i != m_data.size(); ++i) {
+			for (; i != size(); ++i) {
 				res.m_data[i] = m_data[i];
 			}
-			for (; i < other.m_data.size(); ++i) {
+			for (; i < other.size(); ++i) {
 				res.m_data[i] = other.m_data[i];
 			}
 			return res;
 		}
 
 		inline bigint &operator^=(const bigint &other) {
-			if (m_data.size() == other.m_data.size()) {
-				size_t i = m_data.size() - 1;
+			if (size() == other.size()) {
+				size_t i = size() - 1;
 				while (~i && (m_data[i] == other.m_data[i] ||
 							  m_data[i] ^ other.m_data[i] ==
 											  static_cast<uint64_t>(-1))) {
@@ -213,15 +213,15 @@ namespace ds {
 				for (; ~i; --i) {
 					m_data[i] ^= other.m_data[i];
 				}
-			} else if (m_data.size() < other.m_data.size()) {
-				for (size_t i = 0; i != m_data.size(); ++i) {
+			} else if (size() < other.size()) {
+				for (size_t i = 0; i != size(); ++i) {
 					m_data[i] ^= other.m_data[i];
 				}
 				m_data.insert(m_data.end(),
-							  other.m_data.begin() + m_data.size(),
+							  other.m_data.begin() + size(),
 							  other.m_data.end());
 			} else {
-				for (size_t i = 0; i != other.m_data.size(); ++i) {
+				for (size_t i = 0; i != other.size(); ++i) {
 					m_data[i] ^= other.m_data[i];
 				}
 			}
@@ -229,8 +229,8 @@ namespace ds {
 		}
 		inline bigint operator^(const bigint &other) const {
 			bigint res;
-			if (m_data.size() == other.m_data.size()) {
-				size_t i = m_data.size() - 1;
+			if (size() == other.size()) {
+				size_t i = size() - 1;
 				while (~i && (m_data[i] == other.m_data[i] ||
 							  m_data[i] ^ other.m_data[i] ==
 											  static_cast<uint64_t>(-1))) {
@@ -240,41 +240,41 @@ namespace ds {
 				for (; ~i; --i) {
 					res.m_data[i] = m_data[i] ^ other.m_data[i];
 				}
-			} else if (m_data.size() < other.m_data.size()) {
-				res.m_data.resize(other.m_data.size());
-				for (size_t i = 0; i != m_data.size(); ++i) {
+			} else if (size() < other.size()) {
+				res.m_data.resize(other.size());
+				for (size_t i = 0; i != size(); ++i) {
 					res.m_data[i] = (m_data[i] ^ other.m_data[i]);
 				}
 				res.m_data.insert(res.m_data.end(),
-								  other.m_data.begin() + m_data.size(),
+								  other.m_data.begin() + size(),
 								  other.m_data.end());
 			} else {
-				res.m_data.resize(m_data.size());
-				for (size_t i = 0; i != other.m_data.size(); ++i) {
+				res.m_data.resize(size());
+				for (size_t i = 0; i != other.size(); ++i) {
 					res.m_data[i] = (m_data[i] ^ other.m_data[i]);
 				}
 				res.m_data.insert(res.m_data.end(),
-								  m_data.begin() + other.m_data.size(),
+								  m_data.begin() + other.size(),
 								  m_data.end());
 			}
 			return res;
 		}
 
 		inline bigint &operator+=(const bigint &other) {
-			if (m_data.size() < other.m_data.size()) {
-				m_signed_expand(other.m_data.size());
+			if (size() < other.size()) {
+				m_signed_expand(other.size());
 			}
-			// m_data.size() >= other.m_data.size()
+			// size() >= other.size()
 			size_t i = 0;
 			bool carry = false;
 			std::pair<bool, unit_t> p = {false, 0}, q = {false, 0};
-			for (; i != other.m_data.size(); ++i) {
+			for (; i != other.size(); ++i) {
 				p = s_plus_unit(m_data[i], other.m_data[i]);
 				q = s_plus_unit(p.second, carry);
 				m_data[i] = q.second;
 				carry = (p.first || q.first);
 			}
-			for (; carry && i != m_data.size(); ++i) {
+			for (; carry && i != size(); ++i) {
 				p = s_plus_unit(m_data[i], carry);
 				m_data[i] = p.second;
 				carry = p.first;
@@ -296,7 +296,7 @@ namespace ds {
 				return os << 0;
 			}
 			os << x.m_data.back();
-			for (size_t i = x.m_data.size() - 2; ~i; --i) {
+			for (size_t i = x.size() - 2; ~i; --i) {
 				os << ' ' << x.m_data[i];
 			}
 			return os;
@@ -305,7 +305,7 @@ namespace ds {
 	protected:
 		std::vector<uint64_t> m_data;
 
-		inline void m_signed_expand(size_t n) { // Suppose n >= m_data.size()
+		inline void m_signed_expand(size_t n) { // Suppose n >= size()
 			if (m_data.empty()) {
 				m_data.resize(n);
 			} else if (m_data.back() &
