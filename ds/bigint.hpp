@@ -267,7 +267,7 @@ namespace ds {
 			// size() >= other.size()
 			size_t i = 0;
 			bool carry = false;
-			std::pair<bool, unit_t> p = {false, 0}, q = {false, 0};
+			std::pair<bool, unit_t> p, q;
 			for (; i != other.size(); ++i) {
 				p = s_plus_unit(m_data[i], other.m_data[i]);
 				q = s_plus_unit(p.second, carry);
@@ -283,6 +283,35 @@ namespace ds {
 				m_data.push_back(1);
 			}
 			return *this;
+		}
+		inline bigint operator+(const bigint &other) const {
+			size_t i = 0;
+			bool carry = false;
+			std::pair<bool, uint64_t> p, q;
+			bigint res;
+			res.m_data.resize(std::max(size(), other.size()));
+			for (size_t min_sz = std::min(size(), other.size());
+				 i != min_sz;
+				 ++i) {
+				p = s_plus_unit(m_data[i], other.m_data[i]);
+				q = s_plus_unit(p.second, carry);
+				res.m_data[i] = q.second;
+				carry = (p.first || q.first);
+			}
+			for (; carry && i != size(); ++i) {
+				p = s_plus_unit(m_data[i], carry);
+				res.m_data[i] = p.second;
+				carry = p.first;
+			}
+			for (; carry && i < other.size(); ++i) {
+				p = s_plus_unit(other.m_data[i], carry);
+				res.m_data[i] = p.second;
+				carry = p.first;
+			}
+			if (carry) {
+				res.m_data.push_back(1);
+			}
+			return res;
 		}
 
 		inline bool operator==(const bigint &other) const {
