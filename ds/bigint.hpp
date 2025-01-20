@@ -37,7 +37,7 @@ namespace ds {
 		inline bigint(const bigint &) = default;
 		inline bigint(bigint &&) = default;
 
-		inline size_t size() const { return size(); }
+		inline size_t size() const { return m_data.size(); }
 		inline size_t capacity() const { return m_data.capacity(); }
 
 		inline void reserve(size_t n) { m_data.reserve(n); }
@@ -168,7 +168,6 @@ namespace ds {
 			while (~i && !(m_data[i] & other.m_data[i])) {
 				--i;
 			}
-			bigint res;
 			res.m_data.resize(i + 1);
 			for (; ~i; --i) {
 				res.m_data[i] = (m_data[i] & other.m_data[i]);
@@ -205,8 +204,8 @@ namespace ds {
 			if (size() == other.size()) {
 				size_t i = size() - 1;
 				while (~i && (m_data[i] == other.m_data[i] ||
-							  m_data[i] ^ other.m_data[i] ==
-											  static_cast<uint64_t>(-1))) {
+							  (m_data[i] ^ other.m_data[i]) ==
+								  static_cast<uint64_t>(-1))) {
 					--i;
 				}
 				m_data.resize(i + 1);
@@ -232,8 +231,8 @@ namespace ds {
 			if (size() == other.size()) {
 				size_t i = size() - 1;
 				while (~i && (m_data[i] == other.m_data[i] ||
-							  m_data[i] ^ other.m_data[i] ==
-											  static_cast<uint64_t>(-1))) {
+							  (m_data[i] ^ other.m_data[i]) ==
+								  static_cast<uint64_t>(-1))) {
 					--i;
 				}
 				res.m_data.resize(i + 1);
@@ -312,6 +311,14 @@ namespace ds {
 				res.m_data.push_back(1);
 			}
 			return res;
+		}
+
+		inline bigint operator-() const { return (~*this += 1); }
+		inline bigint &operator-=(const bigint &other) {
+			return (*this += -other);
+		}
+		inline bigint operator-(const bigint other) const {
+			return (*this + (-other));
 		}
 
 		inline bool operator==(const bigint &other) const {
